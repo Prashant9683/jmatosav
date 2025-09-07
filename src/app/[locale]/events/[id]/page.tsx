@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import type { Database } from "@/types/supabase";
+import RegisterButton from "@/components/RegisterButton";
 
 interface EventDetailPageProps {
   params: Promise<{
@@ -13,7 +14,7 @@ export default async function EventDetailPage({
   params,
 }: EventDetailPageProps) {
   const { id, locale } = await params;
-  
+
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -57,9 +58,7 @@ export default async function EventDetailPage({
       </div>
 
       {/* We will add real logic to this button in a later module */}
-      <button className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-        Register for this Event
-      </button>
+      <RegisterButton eventId={event.id} isInitiallyRegistered={false} />
     </div>
   );
 }
