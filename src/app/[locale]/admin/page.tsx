@@ -8,7 +8,7 @@ export default async function AdminDashboard({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  
+
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -35,7 +35,7 @@ export default async function AdminDashboard({
             <tr>
               <th className="p-4">Event Title (English)</th>
               <th className="p-4">Date</th>
-              <th className="p-4">Actions</th>
+              <th className="p-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -43,7 +43,13 @@ export default async function AdminDashboard({
               <tr key={event.id} className="border-t border-gray-700">
                 <td className="p-4">{event.title_en}</td>
                 <td className="p-4">{event.event_date}</td>
-                <td className="p-4">
+                <td className="p-4 space-x-4 text-center">
+                  <Link
+                    href={`/${locale}/admin/events/${event.id}/registrations`}
+                    className="text-green-400 hover:underline"
+                  >
+                    View Registrations
+                  </Link>
                   <Link
                     href={`/${locale}/admin/events/${event.id}/edit`}
                     className="text-blue-400 hover:underline"
