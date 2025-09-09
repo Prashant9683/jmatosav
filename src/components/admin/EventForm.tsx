@@ -6,6 +6,27 @@ import { supabase } from "@/lib/supabase-client";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
+// Define a type for the local form state
+type FormState = {
+  title_en: string;
+  title_hi: string;
+  description_en: string;
+  description_hi: string;
+  rules_en: string;
+  rules_hi: string;
+  venue_en: string;
+  venue_hi: string;
+  event_date: string;
+  start_time: string;
+  end_time: string;
+  image_url: string;
+  category: string;
+  organizer_1_name: string;
+  organizer_1_phone: string;
+  organizer_2_name: string;
+  organizer_2_phone: string;
+};
+
 type Event = Database["public"]["Tables"]["events"]["Row"];
 interface EventFormProps {
   initialData?: Event | null; // This prop will be used when editing an existing event
@@ -19,7 +40,7 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
   });
   const router = useRouter();
   // Initialize form state with initialData if it exists, otherwise use empty strings
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormState>({
     title_en: initialData?.title_en || "",
     title_hi: initialData?.title_hi || "",
     description_en: initialData?.description_en || "",
@@ -107,7 +128,7 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
 
       // Check for any null/undefined values that might cause issues
       const problematicFields = Object.entries(formData).filter(
-        ([key, value]) => value === null || value === undefined
+        ([, value]) => value === null || value === undefined
       );
       if (problematicFields.length > 0) {
         console.warn("Found problematic fields:", problematicFields);
@@ -117,7 +138,7 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
       console.log("🚀 Starting Supabase operation...");
       const startTime = Date.now();
 
-      let data, error;
+      let data: unknown, error: unknown;
       try {
         if (initialData) {
           console.log("Performing UPDATE operation...");
@@ -132,13 +153,10 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
           console.log("📝 Performing INSERT operation...");
           console.log("📝 Insert data:", formData);
 
-          // Check for any empty strings that should be null
-          const cleanedData = { ...formData } as any;
-          Object.keys(cleanedData).forEach((key) => {
-            if (cleanedData[key] === "") {
-              cleanedData[key] = null;
-            }
-          });
+          // Convert empty strings to null for insert payload
+          const cleanedData = Object.fromEntries(
+            Object.entries(formData).map(([k, v]) => [k, v === "" ? null : v])
+          ) as Partial<Event>;
           console.log("📝 Cleaned data:", cleanedData);
 
           // Test basic Supabase connection first with timeout using fresh client
@@ -150,7 +168,7 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
               .from("events")
               .select("count")
               .limit(1);
-            const testTimeout = new Promise((_, reject) =>
+            const testTimeout: Promise<never> = new Promise((_, reject) =>
               setTimeout(
                 () => reject(new Error("Connection test timeout")),
                 5000
@@ -174,7 +192,7 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
             .from("events")
             .insert(cleanedData);
 
-          const timeoutPromise = new Promise((_, reject) =>
+          const timeoutPromise: Promise<never> = new Promise((_, reject) =>
             setTimeout(
               () =>
                 reject(new Error("INSERT operation timeout after 15 seconds")),
@@ -183,12 +201,11 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
           );
 
           console.log("⏰ Starting INSERT with timeout...");
-          const result = (await Promise.race([
-            insertPromise,
-            timeoutPromise,
-          ])) as any;
+          const result = await Promise.race([insertPromise, timeoutPromise]);
           console.log("📝 Insert result:", result);
+          // @ts-expect-error Supabase response has .data and .error
           data = result.data;
+          // @ts-expect-error Supabase response has .error and .data
           error = result.error;
         }
       } catch (supabaseError) {
@@ -207,9 +224,14 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
 
       if (error) {
         console.error("Error saving event:", error);
-        alert(
-          `Failed to save event: ${(error as any)?.message || "Unknown error"}`
-        );
+        let errorMessage = "Unknown error";
+        if (error && typeof error === "object" && "message" in error) {
+          const maybeMessage = (error as { message?: unknown }).message;
+          if (typeof maybeMessage === "string") {
+            errorMessage = maybeMessage;
+          }
+        }
+        alert(`Failed to save event: ${errorMessage}`);
         setIsLoading(false);
         return;
       }
