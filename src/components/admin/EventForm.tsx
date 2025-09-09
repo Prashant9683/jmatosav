@@ -153,10 +153,27 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
           console.log("📝 Performing INSERT operation...");
           console.log("📝 Insert data:", formData);
 
-          // Convert empty strings to null for insert payload
-          const cleanedData = Object.fromEntries(
-            Object.entries(formData).map(([k, v]) => [k, v === "" ? null : v])
-          ) as Partial<Event>;
+          // Build a strongly-typed Insert payload
+          const cleanedData: Database["public"]["Tables"]["events"]["Insert"] =
+            {
+              title_en: formData.title_en,
+              title_hi: formData.title_hi,
+              event_date: formData.event_date,
+              start_time: formData.start_time,
+              end_time: formData.end_time || null,
+              description_en: formData.description_en || null,
+              description_hi: formData.description_hi || null,
+              rules_en: formData.rules_en || null,
+              rules_hi: formData.rules_hi || null,
+              venue_en: formData.venue_en || null,
+              venue_hi: formData.venue_hi || null,
+              image_url: formData.image_url || null,
+              category: formData.category || null,
+              organizer_1_name: formData.organizer_1_name || null,
+              organizer_1_phone: formData.organizer_1_phone || null,
+              organizer_2_name: formData.organizer_2_name || null,
+              organizer_2_phone: formData.organizer_2_phone || null,
+            };
           console.log("📝 Cleaned data:", cleanedData);
 
           // Test basic Supabase connection first with timeout using fresh client
@@ -201,11 +218,13 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
           );
 
           console.log("⏰ Starting INSERT with timeout...");
-          const result = await Promise.race([insertPromise, timeoutPromise]);
+          type InsertResult = Awaited<typeof insertPromise>;
+          const result = (await Promise.race([
+            insertPromise,
+            timeoutPromise,
+          ])) as InsertResult;
           console.log("📝 Insert result:", result);
-          // @ts-expect-error Supabase response has .data and .error
           data = result.data;
-          // @ts-expect-error Supabase response has .error and .data
           error = result.error;
         }
       } catch (supabaseError) {
