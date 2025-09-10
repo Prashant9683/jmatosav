@@ -85,18 +85,21 @@ export type Database = {
           created_at: string | null
           event_id: number
           id: number
+          checked_in_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           event_id: number
           id?: number
+          checked_in_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           event_id?: number
           id?: number
+          checked_in_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -107,7 +110,36 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "registrations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      ,
+      profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          email: string | null
+          role: string | null
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          email?: string | null
+          role?: string | null
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          email?: string | null
+          role?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

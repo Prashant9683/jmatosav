@@ -2,18 +2,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
 
 export default function AdminGate({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth();
   const router = useRouter();
+  const params = useParams<{ locale?: string }>();
 
   useEffect(() => {
     if (!loading && (!profile || profile.role !== "admin")) {
-      router.replace("/");
+      const locale = params?.locale || "en";
+      router.replace(`/${locale}`);
     }
-  }, [loading, profile, router]);
+  }, [loading, profile, router, params?.locale]);
 
   if (loading) {
     return (

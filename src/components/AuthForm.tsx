@@ -37,7 +37,8 @@ export function AuthForm() {
       if (error) {
         setError(error.message);
       } else {
-        router.push("/");
+        router.push("/dashboard");
+        router.refresh();
       }
     } catch {
       setError("An unexpected error occurred");

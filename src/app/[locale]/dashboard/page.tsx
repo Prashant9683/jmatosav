@@ -1,52 +1,94 @@
-import { createClient } from "@supabase/supabase-js";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Database } from "@/types/supabase";
+import type { Tables } from "@/types/supabase";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/lib/supabase-client";
 
-export default async function DashboardPage({
-  params,
-}: {
+type Registration = Tables<"registrations">;
+type Event = Tables<"events">;
+
+interface DashboardPageProps {
   params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+}
 
-  // Check for an active user session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export default function DashboardPage({ params }: DashboardPageProps) {
+  const router = useRouter();
+  const { session, loading } = useAuth();
+  const [locale, setLocale] = useState<string>("");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // If no user is logged in, redirect them to the login page
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setLocale(resolvedParams.locale);
+    };
+    getParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!loading) {
+      if (!session) {
+        router.push(`/${locale}/login`);
+        return;
+      }
+
+      // Fetch user's registered events
+      const fetchRegisteredEvents = async () => {
+        try {
+          // 1. Get all event IDs the user has registered for
+          const { data: userRegistrations, error: regError } = await supabase
+            .from("registrations")
+            .select("id, event_id")
+            .eq("user_id", session.user.id);
+
+          if (regError) {
+            console.error("Error fetching registrations:", regError);
+            return;
+          }
+
+          setRegistrations((userRegistrations as Registration[]) || []);
+          const eventIds = (userRegistrations || []).map((r) => r.event_id);
+
+          // 2. Fetch the full details for those events
+          if (eventIds.length > 0) {
+            const { data: userEvents, error: eventsError } = await supabase
+              .from("events")
+              .select("*")
+              .in("id", eventIds);
+
+            if (eventsError) {
+              console.error("Error fetching event details:", eventsError);
+              return;
+            }
+
+            setEvents(userEvents || []);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchRegisteredEvents();
+    }
+  }, [session, loading, locale, router]);
+
+  if (loading || isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
   if (!session) {
-    redirect(`/${locale}/login`);
-  }
-
-  // 1. Get all event IDs the user has registered for
-  const { data: registrations, error: regError } = await supabase
-    .from("registrations")
-    .select("event_id")
-    .eq("user_id", session.user.id);
-
-  if (regError) {
-    console.error("Error fetching registrations:", regError);
-    return <p>Error loading your events.</p>;
-  }
-
-  const eventIds = registrations.map((r) => r.event_id);
-
-  // 2. Fetch the full details for those events
-  const { data: events, error: eventsError } = await supabase
-    .from("events")
-    .select("*")
-    .in("id", eventIds);
-
-  if (eventsError) {
-    console.error("Error fetching event details:", eventsError);
-    return <p>Error loading your events.</p>;
+    return null; // Will redirect in useEffect
   }
 
   return (
@@ -57,6 +99,9 @@ export default async function DashboardPage({
           {events.map((event) => {
             const title = locale === "hi" ? event.title_hi : event.title_en;
             const venue = locale === "hi" ? event.venue_hi : event.venue_en;
+            const registration = registrations.find(
+              (r) => r.event_id === event.id
+            );
             return (
               <li
                 key={event.id}
@@ -66,12 +111,14 @@ export default async function DashboardPage({
                   <h2 className="text-xl font-bold">{title}</h2>
                   <p className="text-gray-400">{venue}</p>
                 </div>
-                <Link
-                  href={`/${locale}/events/${event.id}`}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                >
-                  View
-                </Link>
+                {registration && (
+                  <Link
+                    href={`/${locale}/ticket/${registration.id}`}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    View Ticket
+                  </Link>
+                )}
               </li>
             );
           })}

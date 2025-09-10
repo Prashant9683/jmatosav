@@ -26,6 +26,7 @@ export function EventCard({ event, locale }: EventCardProps) {
             fill
             className="object-cover transition-transform duration-300 hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={event.id <= 4} // Add priority for first 4 events (above the fold)
           />
         </div>
 

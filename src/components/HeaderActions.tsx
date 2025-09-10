@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import type { Session } from "@supabase/supabase-js";
+import { useAuth } from "@/components/AuthProvider";
 
-export default function HeaderActions({
-  session,
-}: {
-  session: Session | null;
-}) {
+export default function HeaderActions() {
   const router = useRouter();
+  const { session, loading } = useAuth();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.refresh();
   };
+
+  if (loading) {
+    return <div className="text-sm">Loading...</div>;
+  }
 
   if (session) {
     return (

@@ -23,11 +23,6 @@ export default async function RegistrationsPage({
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-  // Untyped client for tables not present in generated types (e.g., profiles)
-  const rawSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   // Fetch the event details to display the title
   const { data: event } = await supabase
@@ -52,22 +47,24 @@ export default async function RegistrationsPage({
 
   // Step 2: Fetch profiles for unique user_ids (if any)
   const userIds = Array.from(new Set((regRows || []).map((r) => r.user_id)));
-  let profilesById = new Map<
+  const profilesById = new Map<
     string,
     { full_name: string | null; email: string | null }
   >();
   if (userIds.length > 0) {
-    const { data: profilesData, error: profilesError } = await rawSupabase
+    type ProfileRow = { id: string; full_name: string | null; email: string | null };
+    const { data: profilesData, error: profilesError } = await supabase
       .from("profiles")
       .select("id, full_name, email")
       .in("id", userIds);
     if (profilesError) {
       console.error("Error fetching profiles", profilesError);
     } else {
-      for (const p of profilesData || []) {
-        profilesById.set((p as any).id as string, {
-          full_name: (p as any).full_name ?? null,
-          email: (p as any).email ?? null,
+      const rows = (profilesData ?? []) as ProfileRow[];
+      for (const p of rows) {
+        profilesById.set(p.id, {
+          full_name: p.full_name ?? null,
+          email: p.email ?? null,
         });
       }
     }
@@ -79,8 +76,7 @@ export default async function RegistrationsPage({
     profiles: profilesById.get(r.user_id) ?? null,
   }));
 
-  const eventTitle =
-    locale === "hi" ? (event as any).title_hi : (event as any).title_en;
+  const eventTitle = locale === "hi" ? event.title_hi : event.title_en;
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
