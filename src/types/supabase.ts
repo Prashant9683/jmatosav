@@ -80,26 +80,47 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          email: string | null
+          full_name: string | null
+          id: string
+          role: string | null
+        }
+        Insert: {
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role?: string | null
+        }
+        Update: {
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
       registrations: {
         Row: {
+          checked_in_at: string | null
           created_at: string | null
           event_id: number
           id: number
-          checked_in_at: string | null
           user_id: string
         }
         Insert: {
+          checked_in_at?: string | null
           created_at?: string | null
           event_id: number
           id?: number
-          checked_in_at?: string | null
           user_id: string
         }
         Update: {
+          checked_in_at?: string | null
           created_at?: string | null
           event_id?: number
           id?: number
-          checked_in_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -110,34 +131,35 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "registrations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
-      ,
-      profiles: {
+      volunteers: {
         Row: {
-          id: string
-          full_name: string | null
-          email: string | null
-          role: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: number
+          phone_number: string | null
+          reason_for_volunteering: string | null
+          status: string
         }
         Insert: {
-          id: string
-          full_name?: string | null
-          email?: string | null
-          role?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: number
+          phone_number?: string | null
+          reason_for_volunteering?: string | null
+          status?: string
         }
         Update: {
-          id?: string
-          full_name?: string | null
-          email?: string | null
-          role?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: number
+          phone_number?: string | null
+          reason_for_volunteering?: string | null
+          status?: string
         }
         Relationships: []
       }

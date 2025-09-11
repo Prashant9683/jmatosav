@@ -5,6 +5,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import HeaderActions from "@/components/HeaderActions";
 import Link from "next/link";
 import "./../globals.css";
+import Footer from "@/components/Footer";
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -32,6 +33,7 @@ export default async function RootLayout({
               <HeaderActions />
             </header>
             <main>{children}</main>
+            <Footer />
           </I18nClientProvider>
         </AuthProvider>
       </body>

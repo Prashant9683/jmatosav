@@ -28,6 +28,12 @@ export default async function AdminDashboard({
         >
           + Create New Event
         </Link>
+        <Link
+          href={`/${locale}/admin/volunteers`}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+        >
+          Manage Volunteers
+        </Link>
       </div>
       <div className="bg-gray-800 rounded-lg overflow-hidden">
         <table className="w-full text-left">
