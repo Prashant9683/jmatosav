@@ -10,11 +10,38 @@ export default function VolunteerForm() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const response = await submitVolunteerApplication(formData);
-    setMessage(response.message);
-    setIsSuccess(response.success);
-    if (response.success) {
-      (event.target as HTMLFormElement).reset();
+
+    // Try API route first (primary method)
+    try {
+      const response = await fetch("/api/volunteer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.get("fullName"),
+          email: formData.get("email"),
+          phoneNumber: formData.get("phoneNumber"),
+          reason: formData.get("reason"),
+        }),
+      });
+
+      const result = await response.json();
+      setMessage(result.message);
+      setIsSuccess(result.success);
+      if (result.success) {
+        (event.target as HTMLFormElement).reset();
+      }
+    } catch (error) {
+      console.error("API route failed, trying server action:", error);
+
+      // Fallback to server action
+      const response = await submitVolunteerApplication(formData);
+      setMessage(response.message);
+      setIsSuccess(response.success);
+      if (response.success) {
+        (event.target as HTMLFormElement).reset();
+      }
     }
   };
 
