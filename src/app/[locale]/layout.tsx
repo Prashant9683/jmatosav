@@ -22,15 +22,34 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         <AuthProvider>
           <I18nClientProvider locale={locale}>
-            <header className="p-4 bg-gray-800 text-white flex justify-between items-center">
-              <Link href="/" className="text-xl font-bold">
-                Jalore Mahotsav
-              </Link>{" "}
-              <LanguageSwitcher />
-              <HeaderActions />
+            <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-lg shadow-sm">
+              <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                <Link
+                  href={`/${locale}`}
+                  className="font-heading text-2xl font-bold text-primary-600 transition-colors hover:text-primary-700"
+                >
+                  Jalore Mahotsav
+                </Link>
+                <div className="flex items-center gap-4">
+                  <LanguageSwitcher />
+                  <HeaderActions />
+                </div>
+              </div>
             </header>
             <main>{children}</main>
             <Footer />
