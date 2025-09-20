@@ -47,12 +47,12 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <Card className="w-full max-w-md border border-neutral-200 bg-white shadow-lg">
+      <div className="min-h-screen bg-white flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md border border-black/10 bg-white shadow-xl">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-success-100">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <svg
-                className="h-6 w-6 text-success-600"
+                className="h-6 w-6 text-green-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -65,17 +65,17 @@ export default function ResetPasswordPage() {
                 />
               </svg>
             </div>
-            <CardTitle className="font-heading text-2xl font-bold text-neutral-900">
+            <CardTitle className="text-2xl font-bold text-black">
               Check Your Email
             </CardTitle>
-            <CardDescription className="font-sans text-neutral-600">
-              We've sent a password reset link to {email}
+            <CardDescription className="text-blue-900/70">
+              We&apos;ve sent a password reset link to {email}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="font-sans text-sm text-neutral-600 text-center">
-              Click the link in your email to reset your password. If you don't
-              see it, check your spam folder.
+            <p className="text-sm text-blue-900/70 text-center">
+              Click the link in your email to reset your password. If you
+              don&apos;t see it, check your spam folder.
             </p>
             <Link href={`/${locale}/login`}>
               <Button variant="outline" className="w-full">
@@ -89,31 +89,28 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md border border-neutral-200 bg-white shadow-lg">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md border border-black/10 bg-white shadow-xl">
         <CardHeader className="text-center">
-          <CardTitle className="font-heading text-2xl font-bold text-neutral-900">
+          <CardTitle className="text-2xl font-bold text-black">
             Reset Password
           </CardTitle>
-          <CardDescription className="font-sans text-neutral-600">
-            Enter your email address and we'll send you a link to reset your
-            password
+          <CardDescription className="text-blue-900/70">
+            Enter your email address and we&apos;ll send you a link to reset
+            your password
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
           {error && (
-            <div className="rounded-lg bg-error-50 border border-error-200 p-3 text-sm text-error-700">
+            <div className="rounded-lg bg-white border border-red-500 p-3 text-sm text-red-900">
               {error}
             </div>
           )}
 
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label
-                htmlFor="email"
-                className="font-sans text-sm font-medium text-neutral-700"
-              >
+              <Label htmlFor="email" className="text-sm font-medium text-black">
                 Email address
               </Label>
               <Input
@@ -124,25 +121,25 @@ export default function ResetPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
-                className="h-10 border-neutral-200 bg-white font-sans text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:ring-primary-500"
+                className="h-10 border-black/20 bg-white text-black placeholder:text-blue-900/50 focus:border-blue-600 focus:ring-blue-600"
               />
             </div>
 
             <Button
               type="submit"
               disabled={loading || !email}
-              className="w-full bg-primary-500 text-white hover:bg-primary-600 font-sans font-medium"
+              className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium"
             >
               {loading ? "Sending..." : "Send Reset Link"}
             </Button>
           </form>
 
           <div className="text-center">
-            <p className="font-sans text-sm text-neutral-600">
+            <p className="text-sm text-blue-900/70">
               Remember your password?{" "}
               <Link
                 href={`/${locale}/login`}
-                className="font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
               >
                 Sign in
               </Link>

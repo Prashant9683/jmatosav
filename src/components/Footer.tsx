@@ -2,15 +2,13 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="mt-20 border-t border-neutral-200 bg-neutral-50">
+    <footer className="mt-20 border-t border-black/10 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h3 className="font-heading text-lg font-bold text-primary-600">
-              Jalore Mahotsav
-            </h3>
-            <p className="font-sans text-sm text-neutral-600 leading-relaxed">
+            <h3 className="text-lg font-bold text-blue-600">Jalore Mahotsav</h3>
+            <p className="text-sm text-black leading-relaxed">
               Celebrating the rich cultural heritage and traditions of Jalore
               through art, music, dance, and community.
             </p>
@@ -18,25 +16,23 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-heading text-base font-semibold text-neutral-800">
-              Quick Links
-            </h4>
+            <h4 className="text-base font-semibold text-black">Quick Links</h4>
             <nav className="flex flex-col space-y-2">
               <Link
                 href="/about"
-                className="font-sans text-sm text-neutral-600 transition-colors hover:text-primary-600"
+                className="text-sm text-blue-900/70 transition-colors hover:text-blue-600"
               >
                 About Us
               </Link>
               <Link
                 href="/sponsors"
-                className="font-sans text-sm text-neutral-600 transition-colors hover:text-primary-600"
+                className="text-sm text-blue-900/70 transition-colors hover:text-blue-600"
               >
                 Sponsors
               </Link>
               <Link
                 href="/highlights"
-                className="font-sans text-sm text-neutral-600 transition-colors hover:text-primary-600"
+                className="text-sm text-blue-900/70 transition-colors hover:text-blue-600"
               >
                 Highlights
               </Link>
@@ -45,14 +41,12 @@ export default function Footer() {
 
           {/* Social Media */}
           <div className="space-y-4">
-            <h4 className="font-heading text-base font-semibold text-neutral-800">
-              Follow Us
-            </h4>
+            <h4 className="text-base font-semibold text-black">Follow Us</h4>
             <div className="flex space-x-4">
               {/* Facebook */}
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-200 text-neutral-600 transition-colors hover:bg-primary-100 hover:text-primary-600"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200 text-blue-600 transition-colors hover:bg-blue-50 hover:border-blue-600"
                 aria-label="Facebook"
               >
                 <svg
@@ -67,7 +61,7 @@ export default function Footer() {
               {/* Instagram */}
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-200 text-neutral-600 transition-colors hover:bg-primary-100 hover:text-primary-600"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200 text-blue-600 transition-colors hover:bg-blue-50 hover:border-blue-600"
                 aria-label="Instagram"
               >
                 <svg
@@ -82,7 +76,7 @@ export default function Footer() {
               {/* Twitter */}
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-200 text-neutral-600 transition-colors hover:bg-primary-100 hover:text-primary-600"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200 text-blue-600 transition-colors hover:bg-blue-50 hover:border-blue-600"
                 aria-label="Twitter"
               >
                 <svg
@@ -98,8 +92,8 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-12 border-t border-neutral-200 pt-6">
-          <p className="font-sans text-center text-sm text-neutral-500">
+        <div className="mt-12 border-t border-black/10 pt-6">
+          <p className="text-center text-sm text-blue-900/70">
             &copy; {new Date().getFullYear()} Jalore Mahotsav. All rights
             reserved.
           </p>

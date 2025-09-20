@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "./AuthProvider";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminGate({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth();
@@ -19,8 +20,18 @@ export default function AdminGate({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        Loading authentication...
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-blue-900/70 font-medium">
+            Verifying admin access...
+          </p>
+          <div className="space-y-2 max-w-md">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-1/2 mx-auto" />
+          </div>
+        </div>
       </div>
     );
   }

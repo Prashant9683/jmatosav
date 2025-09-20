@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 import { useUser } from "@/components/AuthProvider";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 interface RegisterButtonProps {
   eventId: number;
@@ -18,6 +20,7 @@ export default function RegisterButton({
   const router = useRouter();
   const [isRegistered, setIsRegistered] = useState(isInitiallyRegistered);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRegister = async () => {
     if (!user) {
@@ -27,14 +30,18 @@ export default function RegisterButton({
     }
 
     setIsLoading(true);
-    const { error } = await supabase
+    setError(null);
+
+    const { error: registrationError } = await supabase
       .from("registrations")
       .insert({ event_id: eventId, user_id: user.id });
 
-    if (error) {
+    if (registrationError) {
       // This could happen if they are already registered (due to the UNIQUE constraint)
-      console.error("Error registering:", error);
-      alert("Could not register for the event. You may already be registered.");
+      console.error("Error registering:", registrationError);
+      setError(
+        "Could not register for the event. You may already be registered."
+      );
     } else {
       setIsRegistered(true);
     }
@@ -43,33 +50,41 @@ export default function RegisterButton({
 
   if (!user) {
     return (
-      <button
-        onClick={handleRegister}
-        className="mt-8 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-      >
-        Login to Register
-      </button>
+      <div className="mt-8 space-y-4">
+        <Button
+          onClick={handleRegister}
+          variant="outline"
+          className="w-full h-12 text-base font-semibold border-blue-600 text-blue-600 hover:bg-blue-50"
+        >
+          Login to Register
+        </Button>
+      </div>
     );
   }
 
   if (isRegistered) {
     return (
-      <button
-        disabled
-        className="mt-8 w-full bg-green-700 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed"
-      >
-        ✅ Registered
-      </button>
+      <div className="mt-8 space-y-4">
+        <Button
+          disabled
+          className="w-full h-12 text-base font-semibold bg-green-500 text-white cursor-not-allowed opacity-100"
+        >
+          ✅ Registered
+        </Button>
+      </div>
     );
   }
 
   return (
-    <button
-      onClick={handleRegister}
-      disabled={isLoading}
-      className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:bg-blue-900"
-    >
-      {isLoading ? "Registering..." : "Register for this Event"}
-    </button>
+    <div className="mt-8 space-y-4">
+      {error && <Alert variant="error">{error}</Alert>}
+      <Button
+        onClick={handleRegister}
+        disabled={isLoading}
+        className="w-full h-12 text-base font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+      >
+        {isLoading ? "Registering..." : "Register for this Event"}
+      </Button>
+    </div>
   );
 }

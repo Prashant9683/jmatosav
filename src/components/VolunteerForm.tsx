@@ -2,13 +2,22 @@
 
 import { useState } from "react";
 import { submitVolunteerApplication } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function VolunteerForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
+    setMessage(null);
+
     const formData = new FormData(event.currentTarget);
 
     // Try API route first (primary method)
@@ -42,77 +51,97 @@ export default function VolunteerForm() {
       if (response.success) {
         (event.target as HTMLFormElement).reset();
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const inputClass = "w-full p-2 bg-gray-700 border border-gray-600 rounded-md";
-  const labelClass = "block text-sm font-medium text-gray-300 mb-1";
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="fullName" className={labelClass}>
-          Full Name
-        </label>
-        <input
-          type="text"
-          name="fullName"
-          id="fullName"
-          className={inputClass}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="email" className={labelClass}>
-          Email Address
-        </label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          className={inputClass}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="phoneNumber" className={labelClass}>
-          Phone Number (Optional)
-        </label>
-        <input
-          type="tel"
-          name="phoneNumber"
-          id="phoneNumber"
-          className={inputClass}
-        />
-      </div>
-      <div>
-        <label htmlFor="reason" className={labelClass}>
-          Why do you want to volunteer?
-        </label>
-        <textarea
-          name="reason"
-          id="reason"
-          className={`${inputClass} h-24`}
-          required
-        ></textarea>
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
-      >
-        Submit Application
-      </button>
-      {message && (
-        <p
-          className={`mt-4 text-center p-2 rounded-md ${
-            isSuccess
-              ? "bg-green-800 text-green-200"
-              : "bg-red-800 text-red-200"
-          }`}
-        >
-          {message}
+    <Card className="w-full max-w-2xl mx-auto bg-white border border-black/10 shadow-xl">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold text-black">
+          Become a Volunteer
+        </CardTitle>
+        <p className="text-blue-900/70">
+          Join us in making Jalore Mahotsav a memorable celebration
         </p>
-      )}
-    </form>
+      </CardHeader>
+
+      <CardContent>
+        {message && (
+          <Alert variant={isSuccess ? "success" : "error"} className="mb-6">
+            {message}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="fullName" className="text-black font-medium">
+              Full Name
+            </Label>
+            <Input
+              type="text"
+              name="fullName"
+              id="fullName"
+              className="bg-white border-black/20 text-black placeholder:text-blue-900/50"
+              placeholder="Enter your full name"
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-black font-medium">
+              Email Address
+            </Label>
+            <Input
+              type="email"
+              name="email"
+              id="email"
+              className="bg-white border-black/20 text-black placeholder:text-blue-900/50"
+              placeholder="Enter your email address"
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber" className="text-black font-medium">
+              Phone Number (Optional)
+            </Label>
+            <Input
+              type="tel"
+              name="phoneNumber"
+              id="phoneNumber"
+              className="bg-white border-black/20 text-black placeholder:text-blue-900/50"
+              placeholder="Enter your phone number"
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reason" className="text-black font-medium">
+              Why do you want to volunteer?
+            </Label>
+            <textarea
+              name="reason"
+              id="reason"
+              className="w-full h-24 px-3 py-2 rounded-md border border-black/20 bg-white text-black placeholder:text-blue-900/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+              placeholder="Tell us what motivates you to volunteer for this festival..."
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            {isLoading ? "Submitting..." : "Submit Application"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

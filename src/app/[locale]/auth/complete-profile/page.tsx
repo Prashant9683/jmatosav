@@ -105,8 +105,8 @@ export default function CompleteProfilePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-500"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
       </div>
     );
   }
@@ -116,12 +116,12 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md border border-neutral-200 bg-white shadow-lg">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md border border-black/10 bg-white shadow-xl">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
             <svg
-              className="h-6 w-6 text-primary-600"
+              className="h-6 w-6 text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -134,17 +134,17 @@ export default function CompleteProfilePage() {
               />
             </svg>
           </div>
-          <CardTitle className="font-heading text-2xl font-bold text-neutral-900">
+          <CardTitle className="text-2xl font-bold text-black">
             Complete Your Profile
           </CardTitle>
-          <CardDescription className="font-sans text-neutral-600">
+          <CardDescription className="text-blue-900/70">
             Please provide your details to finish setting up your account
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
           {error && (
-            <div className="rounded-lg bg-error-50 border border-error-200 p-3 text-sm text-error-700">
+            <div className="rounded-lg bg-white border border-red-500 p-3 text-sm text-red-900">
               {error}
             </div>
           )}
@@ -153,7 +153,7 @@ export default function CompleteProfilePage() {
             <div className="space-y-2">
               <Label
                 htmlFor="fullName"
-                className="font-sans text-sm font-medium text-neutral-700"
+                className="text-sm font-medium text-black"
               >
                 Full Name *
               </Label>
@@ -165,15 +165,12 @@ export default function CompleteProfilePage() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 disabled={loading}
-                className="h-10 border-neutral-200 bg-white font-sans text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:ring-primary-500"
+                className="h-10 border-black/20 bg-white text-black placeholder:text-blue-900/50 focus:border-blue-600 focus:ring-blue-600"
               />
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="email"
-                className="font-sans text-sm font-medium text-neutral-700"
-              >
+              <Label htmlFor="email" className="text-sm font-medium text-black">
                 Email Address *
               </Label>
               <Input
@@ -184,14 +181,14 @@ export default function CompleteProfilePage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
-                className="h-10 border-neutral-200 bg-white font-sans text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:ring-primary-500"
+                className="h-10 border-black/20 bg-white text-black placeholder:text-blue-900/50 focus:border-blue-600 focus:ring-blue-600"
               />
             </div>
 
-            <div className="bg-info-50 border border-info-200 rounded-lg p-3">
-              <p className="font-sans text-sm text-info-700">
+            <div className="bg-white border border-blue-600 rounded-lg p-3">
+              <p className="text-sm text-blue-900">
                 <strong>Welcome to Jalore Mahotsav!</strong> After completing
-                your profile, you'll be able to register for events and
+                your profile, you&apos;ll be able to register for events and
                 participate in our cultural festival.
               </p>
             </div>
@@ -199,14 +196,14 @@ export default function CompleteProfilePage() {
             <Button
               type="submit"
               disabled={loading || !fullName.trim() || !email.trim()}
-              className="w-full bg-primary-500 text-white hover:bg-primary-600 font-sans font-medium"
+              className="w-full bg-blue-600 text-white hover:bg-blue-700 font-medium"
             >
               {loading ? "Saving Profile..." : "Complete Profile"}
             </Button>
           </form>
 
           <div className="text-center">
-            <p className="font-sans text-xs text-neutral-500">
+            <p className="text-xs text-blue-900/70">
               By completing your profile, you agree to our terms of service and
               privacy policy.
             </p>

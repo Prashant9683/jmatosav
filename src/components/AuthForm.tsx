@@ -119,12 +119,12 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
   const isSignUp = mode === "signup";
 
   return (
-    <Card className="w-full max-w-md border border-gray-200 bg-white shadow-xl">
+    <Card className="w-full max-w-md border border-black/10 bg-white shadow-xl">
       <CardHeader className="space-y-3 text-center pb-6">
-        <CardTitle className="font-heading text-3xl font-bold text-gray-900">
+        <CardTitle className="text-3xl font-bold text-black">
           {isSignUp ? "Join Jalore Mahotsav" : "Welcome Back"}
         </CardTitle>
-        <CardDescription className="font-sans text-base text-gray-600">
+        <CardDescription className="text-base text-blue-900/70">
           {isSignUp
             ? "Create your account to discover amazing cultural events"
             : "Sign in to your account to continue"}
@@ -133,13 +133,13 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
 
       <CardContent className="space-y-6 px-6 pb-6">
         {error && (
-          <div className="rounded-lg bg-error-50 border border-error-200 p-4 text-sm font-medium text-error-800">
+          <div className="rounded-lg bg-white border border-red-500 p-4 text-sm font-medium text-red-900">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="rounded-lg bg-success-50 border border-success-200 p-4 text-sm font-medium text-success-800">
+          <div className="rounded-lg bg-white border border-green-500 p-4 text-sm font-medium text-green-900">
             {success}
           </div>
         )}
@@ -149,10 +149,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
           className="space-y-5"
         >
           <div className="space-y-2">
-            <Label
-              htmlFor="email"
-              className="font-sans text-sm font-semibold text-gray-800"
-            >
+            <Label htmlFor="email" className="text-sm font-semibold text-black">
               Email address
             </Label>
             <Input
@@ -163,14 +160,14 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              className="h-12 border-gray-300 bg-white font-sans text-gray-900 placeholder:text-gray-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+              className="h-12 border-black/20 bg-white text-black placeholder:text-blue-900/50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 transition-all"
             />
           </div>
 
           <div className="space-y-2">
             <Label
               htmlFor="password"
-              className="font-sans text-sm font-semibold text-gray-800"
+              className="text-sm font-semibold text-black"
             >
               Password
             </Label>
@@ -186,7 +183,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              className="h-12 border-gray-300 bg-white font-sans text-gray-900 placeholder:text-gray-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+              className="h-12 border-black/20 bg-white text-black placeholder:text-blue-900/50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 transition-all"
             />
           </div>
 
@@ -194,7 +191,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="confirmPassword"
-                className="font-sans text-sm font-semibold text-gray-800"
+                className="text-sm font-semibold text-black"
               >
                 Confirm Password
               </Label>
@@ -206,7 +203,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={loading}
-                className="h-12 border-gray-300 bg-white font-sans text-gray-900 placeholder:text-gray-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all"
+                className="h-12 border-black/20 bg-white text-black placeholder:text-blue-900/50 focus:border-blue-600 focus:ring-2 focus:ring-blue-600 transition-all"
               />
             </div>
           )}
@@ -215,7 +212,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
             <div className="flex justify-end">
               <Link
                 href={`/${locale}/auth/reset-password`}
-                className="font-sans text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -225,7 +222,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-12 bg-primary-500 text-white hover:bg-primary-600 font-sans font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full h-12 bg-blue-600 text-white hover:bg-blue-700 font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
           >
             {loading
               ? isSignUp
@@ -239,10 +236,10 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-gray-300" />
+            <span className="w-full border-t border-black/20" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-4 font-sans font-medium text-gray-600">
+            <span className="bg-white px-4 font-medium text-blue-900/70">
               Or continue with
             </span>
           </div>
@@ -253,7 +250,7 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
           variant="outline"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full h-12 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-sans font-semibold text-base transition-all duration-200"
+          className="w-full h-12 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 hover:border-blue-700 font-semibold text-base transition-all duration-200"
         >
           <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
             <path
@@ -277,11 +274,11 @@ export function AuthForm({ mode = "signin" }: AuthFormProps) {
         </Button>
 
         <div className="text-center">
-          <p className="font-sans text-sm text-gray-600">
+          <p className="text-sm text-blue-900/70">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <Link
               href={`/${locale}/${isSignUp ? "login" : "signup"}`}
-              className="font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
             >
               {isSignUp ? "Sign in" : "Sign up"}
             </Link>

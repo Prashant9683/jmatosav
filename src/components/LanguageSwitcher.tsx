@@ -8,27 +8,27 @@ export default function LanguageSwitcher() {
   const changeLocale = useChangeLocale();
 
   return (
-    <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
+    <div className="flex gap-1 p-1 bg-white border border-black/10 rounded-lg w-fit shadow-sm">
       <Button
-        variant={currentLocale === "en" ? "default" : "outline"}
+        variant={currentLocale === "en" ? "default" : "ghost"}
         size="sm"
         onClick={() => changeLocale("en")}
         className={
           currentLocale === "en"
-            ? ""
-            : "bg-transparent border-transparent hover:bg-accent"
+            ? "bg-blue-600 text-white hover:bg-blue-700"
+            : "bg-white text-black hover:bg-blue-50 hover:text-blue-600"
         }
       >
         English
       </Button>
       <Button
-        variant={currentLocale === "hi" ? "default" : "outline"}
+        variant={currentLocale === "hi" ? "default" : "ghost"}
         size="sm"
         onClick={() => changeLocale("hi")}
         className={
           currentLocale === "hi"
-            ? ""
-            : "bg-transparent border-transparent hover:bg-accent"
+            ? "bg-blue-600 text-white hover:bg-blue-700"
+            : "bg-white text-black hover:bg-blue-50 hover:text-blue-600"
         }
       >
         हिन्दी

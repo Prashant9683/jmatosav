@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase.from("volunteers").insert({
+    const { error } = await supabase.from("volunteers").insert({
       full_name: validated.data.fullName,
       email: validated.data.email,
       phone_number: validated.data.phoneNumber,

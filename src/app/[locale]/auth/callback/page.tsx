@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 
 export default function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
   const locale = (params.locale as string) || "en";
 
   useEffect(() => {
@@ -58,12 +57,12 @@ export default function AuthCallbackPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center">
-          <div className="bg-white border border-error-200 rounded-lg p-6 shadow-lg">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-error-100">
+          <div className="bg-white border border-red-500 rounded-lg p-6 shadow-lg">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <svg
-                className="h-6 w-6 text-error-600"
+                className="h-6 w-6 text-red-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -76,13 +75,13 @@ export default function AuthCallbackPage() {
                 />
               </svg>
             </div>
-            <h2 className="font-heading text-xl font-bold text-neutral-900 mb-2">
+            <h2 className="text-xl font-bold text-black mb-2">
               Authentication Error
             </h2>
-            <p className="font-sans text-neutral-600 mb-4">{error}</p>
+            <p className="text-blue-900/70 mb-4">{error}</p>
             <button
               onClick={() => router.push(`/${locale}/login`)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all duration-200"
             >
               Return to Login
             </button>
@@ -93,12 +92,10 @@ export default function AuthCallbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-500 mx-auto mb-4"></div>
-        <p className="font-sans text-lg text-neutral-600">
-          Completing authentication...
-        </p>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
+        <p className="text-lg text-blue-900/70">Completing authentication...</p>
       </div>
     </div>
   );

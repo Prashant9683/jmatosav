@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
 import { useAuth } from "@/components/AuthProvider";
+import { Button } from "@/components/ui/button";
 
 export default function HeaderActions() {
   const router = useRouter();
@@ -15,28 +16,35 @@ export default function HeaderActions() {
   };
 
   if (loading) {
-    return <div className="text-sm">Loading...</div>;
+    return <div className="text-sm text-blue-900/70">Loading...</div>;
   }
 
   if (session) {
     return (
       <div className="flex items-center gap-4">
-        <Link href="/dashboard" className="text-sm font-medium hover:underline">
+        <Link
+          href="/dashboard"
+          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+        >
           Dashboard
         </Link>
-        <button
+        <Button
           onClick={handleLogout}
-          className="text-sm font-medium hover:underline"
+          variant="ghost"
+          size="sm"
+          className="text-sm font-medium text-black hover:text-blue-600"
         >
           Logout
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <Link href="/login" className="text-sm font-medium hover:underline">
-      Login
-    </Link>
+    <Button asChild variant="default" size="sm">
+      <Link href="/login" className="text-sm font-medium">
+        Login
+      </Link>
+    </Button>
   );
 }

@@ -269,249 +269,356 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
     }
   };
 
-  const inputClass =
-    "w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500";
-  const labelClass = "block text-sm font-medium text-gray-300 mb-1";
-  const textareaClass = `${inputClass} h-24`;
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Bilingual Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="title_en" className={labelClass}>
-            Title (English)
-          </label>
-          <input
-            type="text"
-            id="title_en"
-            name="title_en"
-            value={formData.title_en}
-            onChange={handleChange}
-            className={inputClass}
-            required
-          />
+    <div className="bg-white min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-black mb-2">
+            {initialData ? "Edit Event" : "Create New Event"}
+          </h1>
+          <p className="text-blue-900/70">
+            Fill in the details for the festival event
+          </p>
         </div>
-        <div>
-          <label htmlFor="title_hi" className={labelClass}>
-            Title (Hindi)
-          </label>
-          <input
-            type="text"
-            id="title_hi"
-            name="title_hi"
-            value={formData.title_hi}
-            onChange={handleChange}
-            className={inputClass}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="description_en" className={labelClass}>
-            Description (English)
-          </label>
-          <textarea
-            name="description_en"
-            value={formData.description_en || ""}
-            onChange={handleChange}
-            className={textareaClass}
-          ></textarea>
-        </div>
-        <div>
-          <label htmlFor="description_hi" className={labelClass}>
-            Description (Hindi)
-          </label>
-          <textarea
-            name="description_hi"
-            value={formData.description_hi || ""}
-            onChange={handleChange}
-            className={textareaClass}
-          ></textarea>
-        </div>
-        <div>
-          <label htmlFor="rules_en" className={labelClass}>
-            Rules (English)
-          </label>
-          <textarea
-            name="rules_en"
-            value={formData.rules_en || ""}
-            onChange={handleChange}
-            className={textareaClass}
-          ></textarea>
-        </div>
-        <div>
-          <label htmlFor="rules_hi" className={labelClass}>
-            Rules (Hindi)
-          </label>
-          <textarea
-            name="rules_hi"
-            value={formData.rules_hi || ""}
-            onChange={handleChange}
-            className={textareaClass}
-          ></textarea>
-        </div>
-        <div>
-          <label htmlFor="venue_en" className={labelClass}>
-            Venue (English)
-          </label>
-          <input
-            type="text"
-            name="venue_en"
-            value={formData.venue_en || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="venue_hi" className={labelClass}>
-            Venue (Hindi)
-          </label>
-          <input
-            type="text"
-            name="venue_hi"
-            value={formData.venue_hi || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Bilingual Fields Section */}
+          <div className="bg-white border border-black/10 rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold text-black mb-6 flex items-center">
+              <span className="w-2 h-6 bg-blue-600 mr-3 rounded"></span>
+              Event Information
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label
+                  htmlFor="title_en"
+                  className="block text-sm font-medium text-black"
+                >
+                  Title (English) *
+                </label>
+                <input
+                  type="text"
+                  id="title_en"
+                  name="title_en"
+                  value={formData.title_en}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter event title in English"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="title_hi"
+                  className="block text-sm font-medium text-black"
+                >
+                  Title (Hindi) *
+                </label>
+                <input
+                  type="text"
+                  id="title_hi"
+                  name="title_hi"
+                  value={formData.title_hi}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="हिंदी में इवेंट का शीर्षक दर्ज करें"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="description_en"
+                  className="block text-sm font-medium text-black"
+                >
+                  Description (English)
+                </label>
+                <textarea
+                  name="description_en"
+                  value={formData.description_en || ""}
+                  onChange={handleChange}
+                  className="w-full h-24 px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Describe the event in English"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="description_hi"
+                  className="block text-sm font-medium text-black"
+                >
+                  Description (Hindi)
+                </label>
+                <textarea
+                  name="description_hi"
+                  value={formData.description_hi || ""}
+                  onChange={handleChange}
+                  className="w-full h-24 px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="हिंदी में इवेंट का विवरण दें"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="rules_en"
+                  className="block text-sm font-medium text-black"
+                >
+                  Rules (English)
+                </label>
+                <textarea
+                  name="rules_en"
+                  value={formData.rules_en || ""}
+                  onChange={handleChange}
+                  className="w-full h-24 px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter event rules in English"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="rules_hi"
+                  className="block text-sm font-medium text-black"
+                >
+                  Rules (Hindi)
+                </label>
+                <textarea
+                  name="rules_hi"
+                  value={formData.rules_hi || ""}
+                  onChange={handleChange}
+                  className="w-full h-24 px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="हिंदी में इवेंट के नियम दर्ज करें"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="venue_en"
+                  className="block text-sm font-medium text-black"
+                >
+                  Venue (English)
+                </label>
+                <input
+                  type="text"
+                  name="venue_en"
+                  value={formData.venue_en || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter venue in English"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="venue_hi"
+                  className="block text-sm font-medium text-black"
+                >
+                  Venue (Hindi)
+                </label>
+                <input
+                  type="text"
+                  name="venue_hi"
+                  value={formData.venue_hi || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="हिंदी में स्थान दर्ज करें"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Event Details Section */}
+          <div className="bg-white border border-black/10 rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold text-black mb-6 flex items-center">
+              <span className="w-2 h-6 bg-blue-600 mr-3 rounded"></span>
+              Event Details
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label
+                  htmlFor="event_date"
+                  className="block text-sm font-medium text-black"
+                >
+                  Event Date *
+                </label>
+                <input
+                  type="date"
+                  id="event_date"
+                  name="event_date"
+                  value={formData.event_date}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="start_time"
+                  className="block text-sm font-medium text-black"
+                >
+                  Start Time *
+                </label>
+                <input
+                  type="time"
+                  id="start_time"
+                  name="start_time"
+                  value={formData.start_time}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="end_time"
+                  className="block text-sm font-medium text-black"
+                >
+                  End Time (Optional)
+                </label>
+                <input
+                  type="time"
+                  name="end_time"
+                  value={formData.end_time || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="category"
+                  className="block text-sm font-medium text-black"
+                >
+                  Category
+                </label>
+                <input
+                  type="text"
+                  name="category"
+                  value={formData.category || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="e.g., Competition, Performance, Workshop"
+                />
+              </div>
+
+              <div className="col-span-1 md:col-span-2 lg:col-span-2 space-y-2">
+                <label
+                  htmlFor="image_url"
+                  className="block text-sm font-medium text-black"
+                >
+                  Image URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  name="image_url"
+                  value={formData.image_url || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Organizer Information Section */}
+          <div className="bg-white border border-black/10 rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold text-black mb-6 flex items-center">
+              <span className="w-2 h-6 bg-blue-600 mr-3 rounded"></span>
+              Organizer Information
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label
+                  htmlFor="organizer_1_name"
+                  className="block text-sm font-medium text-black"
+                >
+                  Organizer 1 Name
+                </label>
+                <input
+                  type="text"
+                  name="organizer_1_name"
+                  value={formData.organizer_1_name || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter organizer name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="organizer_1_phone"
+                  className="block text-sm font-medium text-black"
+                >
+                  Organizer 1 Phone
+                </label>
+                <input
+                  type="text"
+                  name="organizer_1_phone"
+                  value={formData.organizer_1_phone || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="organizer_2_name"
+                  className="block text-sm font-medium text-black"
+                >
+                  Organizer 2 Name
+                </label>
+                <input
+                  type="text"
+                  name="organizer_2_name"
+                  value={formData.organizer_2_name || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter organizer name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="organizer_2_phone"
+                  className="block text-sm font-medium text-black"
+                >
+                  Organizer 2 Phone
+                </label>
+                <input
+                  type="text"
+                  name="organizer_2_phone"
+                  value={formData.organizer_2_phone || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center pt-4">
+            <button
+              type="submit"
+              disabled={isLoading}
+              onClick={() => console.log("🔘 Submit button clicked!")}
+              className="w-full max-w-md bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+            >
+              {isLoading
+                ? "Saving..."
+                : initialData
+                ? "Update Event"
+                : "Create Event"}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <hr className="border-gray-600" />
-
-      {/* General Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div>
-          <label htmlFor="event_date" className={labelClass}>
-            Event Date
-          </label>
-          <input
-            type="date"
-            id="event_date"
-            name="event_date"
-            value={formData.event_date}
-            onChange={handleChange}
-            className={inputClass}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="start_time" className={labelClass}>
-            Start Time
-          </label>
-          <input
-            type="time"
-            id="start_time"
-            name="start_time"
-            value={formData.start_time}
-            onChange={handleChange}
-            className={inputClass}
-            required
-          />
-        </div>
-        <div>
-          <label htmlFor="end_time" className={labelClass}>
-            End Time (Optional)
-          </label>
-          <input
-            type="time"
-            name="end_time"
-            value={formData.end_time || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="category" className={labelClass}>
-            Category
-          </label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-        <div className="col-span-1 md:col-span-2 lg:col-span-3">
-          <label htmlFor="image_url" className={labelClass}>
-            Image URL (Optional)
-          </label>
-          <input
-            type="url"
-            name="image_url"
-            value={formData.image_url || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <hr className="border-gray-600" />
-
-      {/* Organizer Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="organizer_1_name" className={labelClass}>
-            Organizer 1 Name
-          </label>
-          <input
-            type="text"
-            name="organizer_1_name"
-            value={formData.organizer_1_name || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="organizer_1_phone" className={labelClass}>
-            Organizer 1 Phone
-          </label>
-          <input
-            type="text"
-            name="organizer_1_phone"
-            value={formData.organizer_1_phone || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="organizer_2_name" className={labelClass}>
-            Organizer 2 Name
-          </label>
-          <input
-            type="text"
-            name="organizer_2_name"
-            value={formData.organizer_2_name || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="organizer_2_phone" className={labelClass}>
-            Organizer 2 Phone
-          </label>
-          <input
-            type="text"
-            name="organizer_2_phone"
-            value={formData.organizer_2_phone || ""}
-            onChange={handleChange}
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        onClick={() => console.log("🔘 Submit button clicked!")}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isLoading
-          ? "Saving..."
-          : initialData
-          ? "Update Event"
-          : "Create Event"}
-      </button>
-    </form>
+    </div>
   );
 }

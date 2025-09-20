@@ -81,8 +81,15 @@ export default function DashboardPage({ params }: DashboardPageProps) {
 
   if (loading || isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="text-center">Loading...</div>
+      <div className="min-h-screen bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-blue-900/70 font-medium">
+              Loading your dashboard...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -92,40 +99,152 @@ export default function DashboardPage({ params }: DashboardPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-bold mb-6">My Registered Events</h1>
-      {events && events.length > 0 ? (
-        <ul className="space-y-4">
-          {events.map((event) => {
-            const title = locale === "hi" ? event.title_hi : event.title_en;
-            const venue = locale === "hi" ? event.venue_hi : event.venue_en;
-            const registration = registrations.find(
-              (r) => r.event_id === event.id
-            );
-            return (
-              <li
-                key={event.id}
-                className="bg-gray-800 p-4 rounded-lg flex justify-between items-center"
-              >
-                <div>
-                  <h2 className="text-xl font-bold">{title}</h2>
-                  <p className="text-gray-400">{venue}</p>
-                </div>
-                {registration && (
-                  <Link
-                    href={`/${locale}/ticket/${registration.id}`}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-black mb-4">My Dashboard</h1>
+          <p className="text-lg text-blue-900/70">
+            Manage your event registrations and view your tickets
+          </p>
+        </div>
+
+        {/* Events Section */}
+        <div className="bg-white border border-black/10 rounded-lg p-8 shadow-md">
+          <h2 className="text-2xl font-semibold text-black mb-6 flex items-center">
+            <span className="w-2 h-6 bg-blue-600 mr-3 rounded"></span>
+            My Registered Events
+          </h2>
+
+          {events && events.length > 0 ? (
+            <div className="space-y-4">
+              {events.map((event) => {
+                const title = locale === "hi" ? event.title_hi : event.title_en;
+                const venue = locale === "hi" ? event.venue_hi : event.venue_en;
+                const registration = registrations.find(
+                  (r) => r.event_id === event.id
+                );
+
+                return (
+                  <div
+                    key={event.id}
+                    className="bg-white border border-black/10 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
-                    View Ticket
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p>You have not registered for any events yet.</p>
-      )}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-black mb-2">
+                          {title}
+                        </h3>
+                        <div className="flex items-center text-blue-900/70 mb-1">
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          {venue || "Venue TBA"}
+                        </div>
+                        <div className="flex items-center text-blue-900/70">
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                          {new Date(event.event_date).toLocaleDateString(
+                            locale === "hi" ? "hi-IN" : "en-US"
+                          )}
+                          {event.start_time && ` at ${event.start_time}`}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Link
+                          href={`/${locale}/events/${event.id}`}
+                          className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                        >
+                          View Details
+                        </Link>
+                        {registration && (
+                          <Link
+                            href={`/${locale}/ticket/${registration.id}`}
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+                              />
+                            </svg>
+                            View Ticket
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-2">
+                No Events Yet
+              </h3>
+              <p className="text-blue-900/70 mb-6">
+                You haven&apos;t registered for any events yet.
+              </p>
+              <Link
+                href={`/${locale}/`}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Explore Events
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
