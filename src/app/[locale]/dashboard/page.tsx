@@ -21,6 +21,9 @@ export default function DashboardPage({ params }: DashboardPageProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cancellingRegistration, setCancellingRegistration] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     const getParams = async () => {
@@ -29,6 +32,70 @@ export default function DashboardPage({ params }: DashboardPageProps) {
     };
     getParams();
   }, [params]);
+
+  const handleCancelRegistration = async (registrationId: number) => {
+    if (
+      !confirm(
+        "Are you sure you want to cancel this registration? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    setCancellingRegistration(registrationId);
+
+    try {
+      // Get the current session token
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        alert("You must be logged in to cancel registrations.");
+        return;
+      }
+
+      const response = await fetch("/api/registrations/revoke", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          registrationId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Remove the cancelled registration from state
+        setRegistrations((prev) =>
+          prev.filter((reg) => reg.id !== registrationId)
+        );
+
+        // Remove the event if it was the only registration for that event
+        setEvents((prev) => {
+          const remainingRegistrations = registrations.filter(
+            (reg) => reg.id !== registrationId
+          );
+          const eventIds = remainingRegistrations.map((reg) => reg.event_id);
+          return prev.filter((event) => eventIds.includes(event.id));
+        });
+
+        alert("Registration cancelled successfully!");
+      } else {
+        alert(
+          data.message || "Failed to cancel registration. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error cancelling registration:", error);
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
+      setCancellingRegistration(null);
+    }
+  };
 
   useEffect(() => {
     if (!loading) {
@@ -178,7 +245,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 flex-wrap">
                         <Link
                           href={`/${locale}/events/${event.id}`}
                           className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
@@ -186,25 +253,72 @@ export default function DashboardPage({ params }: DashboardPageProps) {
                           View Details
                         </Link>
                         {registration && (
-                          <Link
-                            href={`/${locale}/ticket/${registration.id}`}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center"
-                          >
-                            <svg
-                              className="w-4 h-4 mr-2"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          <>
+                            <Link
+                              href={`/${locale}/ticket/${registration.id}`}
+                              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-                              />
-                            </svg>
-                            View Ticket
-                          </Link>
+                              <svg
+                                className="w-4 h-4 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+                                />
+                              </svg>
+                              View Ticket
+                            </Link>
+                            <button
+                              onClick={() =>
+                                handleCancelRegistration(registration.id)
+                              }
+                              disabled={
+                                cancellingRegistration === registration.id
+                              }
+                              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {cancellingRegistration === registration.id ? (
+                                <>
+                                  <svg
+                                    className="w-4 h-4 mr-2 animate-spin"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                    />
+                                  </svg>
+                                  Cancelling...
+                                </>
+                              ) : (
+                                <>
+                                  <svg
+                                    className="w-4 h-4 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M6 18L18 6M6 6l12 12"
+                                    />
+                                  </svg>
+                                  Cancel Registration
+                                </>
+                              )}
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
