@@ -2,15 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import type { Tables } from "@/types/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase-client";
 import ProfileForm from "@/components/ProfileForm";
-
-type Profile = Tables<"profiles">;
-type Event = Tables<"events">;
-type Registration = Tables<"registrations">;
 
 interface ProfilePageProps {
   params: Promise<{ locale: string }>;
@@ -24,7 +18,24 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     full_name: string | null;
     email: string | null;
   } | null>(null);
-  const [pastEvents, setPastEvents] = useState<any[]>([]);
+  const [pastEvents, setPastEvents] = useState<
+    Array<{
+      id: number;
+      event_id: number;
+      created_at: string;
+      events:
+        | {
+            id: number;
+            title_en: string;
+            title_hi: string;
+            event_date: string;
+            start_time: string;
+            venue_en: string;
+            venue_hi: string;
+          }[]
+        | null;
+    }>
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -199,13 +210,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             </h2>
 
             {pastEvents &&
-            pastEvents.filter((registration: any) => registration.events)
-              .length > 0 ? (
+            pastEvents.filter((registration) => registration.events).length >
+              0 ? (
               <div className="space-y-4">
                 {pastEvents
-                  .filter((registration: any) => registration.events) // Filter out registrations with null events
-                  .map((registration: any) => {
-                    const event = registration.events;
+                  .filter((registration) => registration.events) // Filter out registrations with null events
+                  .map((registration) => {
+                    const event = registration.events?.[0];
                     const title =
                       locale === "hi" ? event?.title_hi : event?.title_en;
                     const venue =

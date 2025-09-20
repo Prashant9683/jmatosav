@@ -46,7 +46,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
       } else {
         setMessage({ type: "error", text: data.message });
       }
-    } catch (error) {
+    } catch {
       setMessage({
         type: "error",
         text: "An unexpected error occurred. Please try again.",

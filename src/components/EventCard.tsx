@@ -6,7 +6,9 @@ import Link from "next/link";
 import { Database } from "@/types/supabase";
 
 interface EventCardProps {
-  event: Database["public"]["Tables"]["events"]["Row"];
+  event: Database["public"]["Tables"]["events"]["Row"] & {
+    current_registrations?: number;
+  };
   locale: string;
 }
 
@@ -16,9 +18,38 @@ export function EventCard({ event, locale }: EventCardProps) {
     locale === "hi" ? event.description_hi : event.description_en;
   const category = event.category;
 
+  // Determine event status based on registrations and max participants
+  const currentRegistrations = event.current_registrations || 0;
+  const maxParticipants = event.max_participants;
+
+  let eventStatus: "available" | "filling_fast" | "sold_out" = "available";
+  let statusTag = null;
+
+  if (maxParticipants) {
+    if (currentRegistrations >= maxParticipants) {
+      eventStatus = "sold_out";
+      statusTag = (
+        <div className="absolute top-3 left-3">
+          <Badge className="bg-red-500 text-white border-0 font-semibold shadow-sm">
+            Sold Out
+          </Badge>
+        </div>
+      );
+    } else if (currentRegistrations >= maxParticipants * 0.8) {
+      eventStatus = "filling_fast";
+      statusTag = (
+        <div className="absolute top-3 left-3">
+          <Badge className="bg-orange-500 text-white border-0 font-semibold shadow-sm">
+            Filling Fast
+          </Badge>
+        </div>
+      );
+    }
+  }
+
   return (
-    <Link href={`/${locale}/events/${event.id}`} className="group block h-full">
-      <Card className="relative h-full overflow-hidden border border-black/10 bg-white shadow-md transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
+    <Link href={`/${locale}/events/${event.id}`} className="group block">
+      <Card className="relative overflow-hidden border border-black/10 bg-white transition-all duration-300 ease-in-out hover:shadow-lg">
         {/* Event Image */}
         <div className="relative h-48 w-full overflow-hidden">
           <Image
@@ -30,12 +61,15 @@ export function EventCard({ event, locale }: EventCardProps) {
             priority={event.id <= 4}
           />
 
+          {/* Status Tag */}
+          {statusTag}
+
           {/* Category Badge positioned on image */}
           {category && (
             <div className="absolute top-3 right-3">
               <Badge
                 variant="secondary"
-                className="bg-white text-blue-900 border border-blue-200 backdrop-blur-sm font-semibold shadow-sm"
+                className="bg-white text-gray-700 border border-gray-300 font-semibold"
               >
                 {category}
               </Badge>
@@ -44,33 +78,44 @@ export function EventCard({ event, locale }: EventCardProps) {
         </div>
 
         {/* Card Content */}
-        <CardContent className="flex h-full flex-col p-6">
-          <div className="flex-1 space-y-3">
-            {/* Event Title */}
-            <h3 className="text-xl font-bold text-black leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
-              {title}
-            </h3>
+        <CardContent className="p-4">
+          {/* Event Title */}
+          <h3 className="text-lg font-bold text-black leading-tight line-clamp-2 mb-2">
+            {title}
+          </h3>
 
-            {/* Event Description */}
-            <p className="text-sm text-black leading-relaxed line-clamp-3">
-              {description}
-            </p>
-          </div>
+          {/* Event Description */}
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
+            {description}
+          </p>
+
+          {/* Event Date */}
+          {event.event_date && (
+            <div className="text-xs text-gray-500 mb-2">
+              {new Date(event.event_date).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </div>
+          )}
 
           {/* Action Button */}
-          <div className="mt-4 flex justify-end">
+          <div className="mt-3">
             <Button
               variant="default"
               size="sm"
-              className="bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 font-semibold"
+              className={`w-full transition-all duration-200 font-semibold ${
+                eventStatus === "sold_out"
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : "bg-black text-white hover:bg-gray-800"
+              }`}
+              disabled={eventStatus === "sold_out"}
             >
-              View Details
+              {eventStatus === "sold_out" ? "Sold Out" : "Register Now"}
             </Button>
           </div>
         </CardContent>
-
-        {/* Subtle border accent on hover */}
-        <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-blue-200 transition-colors duration-300 pointer-events-none" />
       </Card>
     </Link>
   );

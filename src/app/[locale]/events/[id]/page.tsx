@@ -128,8 +128,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             className="object-cover"
             priority
           />
-          {/* Blue gradient overlay for consistency */}
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-blue-900/20 to-transparent" />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/40" />
 
           {/* Hero Content Overlay */}
           <div className="absolute inset-0 flex items-end">

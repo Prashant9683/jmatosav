@@ -1,7 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
-import { notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import type { Database } from "@/types/supabase";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/lib/supabase-client";
 import ExportButton from "@/components/admin/ExportButton";
 
 // Local type for display/export
@@ -12,78 +15,163 @@ type RegistrationWithProfile = {
   profiles: Profile;
 };
 
-// Correctly typed props for a Next.js 15 Server Component with dynamic params
+// Correctly typed props for a Next.js 15 Client Component with dynamic params
 interface RegistrationsPageProps {
   params: Promise<{ id: string; locale: string }>;
 }
 
-export default async function RegistrationsPage({
-  params,
-}: RegistrationsPageProps) {
-  // Correctly await the params as required by Next.js 15
-  const { id: eventId, locale } = await params;
-
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+export default function RegistrationsPage({ params }: RegistrationsPageProps) {
+  const router = useRouter();
+  const { session, loading } = useAuth();
+  const [locale, setLocale] = useState<string>("");
+  const [eventId, setEventId] = useState<string>("");
+  const [event, setEvent] = useState<{
+    title_en: string;
+    title_hi: string;
+  } | null>(null);
+  const [registrations, setRegistrations] = useState<RegistrationWithProfile[]>(
+    []
   );
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch the event details to display the title
-  const { data: event } = await supabase
-    .from("events")
-    .select("title_en, title_hi")
-    .eq("id", parseInt(eventId))
-    .single();
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setLocale(resolvedParams.locale);
+      setEventId(resolvedParams.id);
+    };
+    getParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!session || !eventId) return;
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Check if user is admin
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profile?.role !== "admin") {
+          router.push(`/${locale}/dashboard`);
+          return;
+        }
+
+        // Fetch the event details
+        const { data: eventData } = await supabase
+          .from("events")
+          .select("title_en, title_hi")
+          .eq("id", parseInt(eventId))
+          .single();
+
+        if (!eventData) {
+          router.push(`/${locale}/admin`);
+          return;
+        }
+
+        setEvent(eventData);
+
+        // Step 1: Fetch registrations with user_id and checked_in_at
+        const { data: regRows, error } = await supabase
+          .from("registrations")
+          .select("id, user_id, checked_in_at")
+          .eq("event_id", parseInt(eventId));
+
+        if (error) {
+          console.error("Error fetching registrations", error);
+        }
+
+        // Step 2: Fetch profiles for unique user_ids (if any)
+        const userIds = Array.from(
+          new Set((regRows || []).map((r) => r.user_id))
+        );
+        const profilesById = new Map<
+          string,
+          { full_name: string | null; email: string | null }
+        >();
+        if (userIds.length > 0) {
+          type ProfileRow = {
+            id: string;
+            full_name: string | null;
+            email: string | null;
+          };
+          const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select("id, full_name, email")
+            .in("id", userIds);
+          if (profilesError) {
+            console.error("Error fetching profiles", profilesError);
+          } else {
+            const rows = (profilesData ?? []) as ProfileRow[];
+            for (const p of rows) {
+              profilesById.set(p.id, {
+                full_name: p.full_name ?? null,
+                email: p.email ?? null,
+              });
+            }
+          }
+        }
+
+        // Map to the shape expected by ExportButton using joined profiles
+        const registrationsData: RegistrationWithProfile[] = (
+          regRows || []
+        ).map((r) => ({
+          id: r.id,
+          checked_in_at: r.checked_in_at,
+          profiles: profilesById.get(r.user_id) ?? null,
+        }));
+
+        setRegistrations(registrationsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [session, eventId, locale, router]);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!loading && !session) {
+      router.push(`/${locale}/login`);
+    }
+  }, [session, loading, locale, router]);
+
+  if (loading || isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-blue-900/70">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!event) {
-    notFound();
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-black mb-4">
+            Event Not Found
+          </h1>
+          <Link
+            href={`/${locale}/admin`}
+            className="text-blue-600 hover:text-blue-700"
+          >
+            Back to Admin Dashboard
+          </Link>
+        </div>
+      </div>
+    );
   }
-
-  // Step 1: Fetch registrations with user_id and checked_in_at
-  const { data: regRows, error } = await supabase
-    .from("registrations")
-    .select("id, user_id, checked_in_at")
-    .eq("event_id", parseInt(eventId));
-
-  if (error) {
-    console.error("Error fetching registrations", error);
-  }
-
-  // Step 2: Fetch profiles for unique user_ids (if any)
-  const userIds = Array.from(new Set((regRows || []).map((r) => r.user_id)));
-  const profilesById = new Map<
-    string,
-    { full_name: string | null; email: string | null }
-  >();
-  if (userIds.length > 0) {
-    type ProfileRow = {
-      id: string;
-      full_name: string | null;
-      email: string | null;
-    };
-    const { data: profilesData, error: profilesError } = await supabase
-      .from("profiles")
-      .select("id, full_name, email")
-      .in("id", userIds);
-    if (profilesError) {
-      console.error("Error fetching profiles", profilesError);
-    } else {
-      const rows = (profilesData ?? []) as ProfileRow[];
-      for (const p of rows) {
-        profilesById.set(p.id, {
-          full_name: p.full_name ?? null,
-          email: p.email ?? null,
-        });
-      }
-    }
-  }
-
-  // Map to the shape expected by ExportButton using joined profiles
-  const registrations: RegistrationWithProfile[] = (regRows || []).map((r) => ({
-    id: r.id,
-    checked_in_at: r.checked_in_at,
-    profiles: profilesById.get(r.user_id) ?? null,
-  }));
 
   const eventTitle = locale === "hi" ? event.title_hi : event.title_en;
 

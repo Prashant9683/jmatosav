@@ -18,7 +18,7 @@ export default function HeaderActions() {
   };
 
   if (loading) {
-    return <div className="text-sm text-blue-900/70">Loading...</div>;
+    return <div className="text-sm text-gray-600">Loading...</div>;
   }
 
   if (session) {
@@ -26,13 +26,13 @@ export default function HeaderActions() {
       <div className="flex items-center gap-4">
         <Link
           href={`/${locale}/dashboard`}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
         >
           Dashboard
         </Link>
         <Link
           href={`/${locale}/profile`}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
         >
           Profile
         </Link>
@@ -40,7 +40,7 @@ export default function HeaderActions() {
           onClick={handleLogout}
           variant="ghost"
           size="sm"
-          className="text-sm font-medium text-black hover:text-blue-600"
+          className="text-sm font-medium text-black hover:text-gray-600"
         >
           Logout
         </Button>

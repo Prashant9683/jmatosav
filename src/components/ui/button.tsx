@@ -25,16 +25,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         className={cn(
-          "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ring-offset-white",
+          "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ring-offset-white",
           {
-            // Primary: Blue background, white text
-            "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg":
+            // Primary: Gray background, white text
+            "bg-gray-700 text-white hover:bg-gray-800 hover:shadow-lg":
               variant === "default",
-            // Outline: White background, blue text and border
-            "border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md":
+            // Outline: White background, gray text and border
+            "border border-gray-600 bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md":
               variant === "outline",
-            // Ghost: Transparent background, blue text on hover
-            "text-black hover:bg-blue-50 hover:text-blue-600":
+            // Ghost: Transparent background, gray text on hover
+            "text-black hover:bg-gray-50 hover:text-gray-600":
               variant === "ghost",
           },
           {

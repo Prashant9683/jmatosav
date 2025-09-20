@@ -24,6 +24,8 @@ type FormState = {
   organizer_1_phone: string;
   organizer_2_name: string;
   organizer_2_phone: string;
+  limit_participants: boolean;
+  max_participants: string;
 };
 
 type Event = Database["public"]["Tables"]["events"]["Row"];
@@ -57,6 +59,8 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
     organizer_1_phone: initialData?.organizer_1_phone || "",
     organizer_2_name: initialData?.organizer_2_name || "",
     organizer_2_phone: initialData?.organizer_2_phone || "",
+    limit_participants: !!initialData?.max_participants,
+    max_participants: initialData?.max_participants?.toString() || "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,8 +73,13 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   // Handles form submission for both creating and updating
@@ -210,6 +219,10 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
               organizer_1_phone: formData.organizer_1_phone?.trim() || null,
               organizer_2_name: formData.organizer_2_name?.trim() || null,
               organizer_2_phone: formData.organizer_2_phone?.trim() || null,
+              max_participants:
+                formData.limit_participants && formData.max_participants
+                  ? parseInt(formData.max_participants)
+                  : null,
             };
 
           // Calculate data size (in bytes) and dynamic timeout
@@ -335,6 +348,10 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
             organizer_1_phone: formData.organizer_1_phone?.trim() || null,
             organizer_2_name: formData.organizer_2_name?.trim() || null,
             organizer_2_phone: formData.organizer_2_phone?.trim() || null,
+            max_participants:
+              formData.limit_participants && formData.max_participants
+                ? parseInt(formData.max_participants)
+                : null,
           };
 
           // Additional validation for required fields
@@ -895,6 +912,54 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
                   placeholder="Enter phone number"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Participant Limit Section */}
+          <div className="bg-white border border-black/10 rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-black mb-4">
+              Participant Limit
+            </h3>
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="limit_participants"
+                  name="limit_participants"
+                  checked={formData.limit_participants}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-blue-600 bg-white border-black/20 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label
+                  htmlFor="limit_participants"
+                  className="text-sm font-medium text-black"
+                >
+                  Limit participants for this event
+                </label>
+              </div>
+
+              {formData.limit_participants && (
+                <div className="space-y-2">
+                  <label
+                    htmlFor="max_participants"
+                    className="block text-sm font-medium text-black"
+                  >
+                    Maximum Participants
+                  </label>
+                  <input
+                    type="number"
+                    id="max_participants"
+                    name="max_participants"
+                    value={formData.max_participants}
+                    onChange={handleChange}
+                    min="1"
+                    className="w-full px-3 py-2 bg-white border border-black/20 rounded-md text-black placeholder:text-blue-900/50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+                    placeholder="Enter maximum number of participants"
+                    required={formData.limit_participants}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

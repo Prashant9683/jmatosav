@@ -7,10 +7,10 @@
   /* Pure black text for maximum contrast and readability */
   --foreground: #000000;
 
-  /* Blue accent colors for the brand */
-  --primary-blue: #2563eb;
-  --primary-blue-hover: #1d4ed8;
-  --primary-blue-light: #dbeafe;
+  /* Gray accent colors for the brand */
+  --primary-gray: #374151;
+  --primary-gray-hover: #1f2937;
+  --primary-gray-light: #f3f4f6;
 
   /* Success/Error colors */
   --success: #22c55e;
@@ -72,24 +72,26 @@ p {
   line-height: 1.5;
 }
 
-/* Focus states with blue ring */
+/* Focus states with gray ring */
 *:focus-visible {
-  outline: 2px solid var(--primary-blue);
+  outline: 2px solid var(--primary-gray);
   outline-offset: 2px;
 }
 
 /* Loading skeleton animation */
 @keyframes shimmer {
   0% {
-    background-position: -468px 0;
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
   }
   100% {
-    background-position: 468px 0;
+    opacity: 0.5;
   }
 }
 
 .animate-shimmer {
   animation: shimmer 2s linear infinite;
-  background: linear-gradient(to right, #ffffff 4%, #dbeafe 25%, #ffffff 36%);
-  background-size: 1000px 100%;
+  background: #f3f4f6;
 }
