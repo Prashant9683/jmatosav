@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase-client";
-import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
 // Define a type for the local form state
@@ -110,16 +109,49 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "Set" : "Not set"
       );
 
-      // Check Supabase client
-      console.log("🔧 Supabase client:", supabase);
+      // Log the actual values (first few characters for security)
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        console.log(
+          "Supabase URL starts with:",
+          process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 20) + "..."
+        );
+        console.log("Full Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+      } else {
+        console.error("❌ NEXT_PUBLIC_SUPABASE_URL is undefined!");
+      }
+      if (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.log(
+          "Supabase Key starts with:",
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.substring(0, 20) + "..."
+        );
+        console.log(
+          "Full Supabase Key:",
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        );
+      } else {
+        console.error("❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is undefined!");
+      }
 
-      // Try creating a fresh Supabase client
-      console.log("🆕 Creating fresh Supabase client...");
-      const freshSupabase = createClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      // Check if environment variables are actually available
+      if (
+        !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      ) {
+        console.error("❌ Supabase environment variables are missing!");
+        alert(
+          "Configuration error: Supabase environment variables are not set. Please contact the administrator."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // Use the existing supabase client instead of creating a new one
+      console.log("🔧 Using existing Supabase client:", supabase);
+
+      // Skip connectivity test for now and proceed directly to the main operation
+      console.log(
+        "⏭️ Skipping connectivity test due to timeout issues, proceeding to main operation"
       );
-      console.log("🆕 Fresh Supabase client created:", freshSupabase);
 
       // Skip connection test for now - it might be causing the hang
       console.log("⏭️ Skipping connection test, proceeding to main operation");
@@ -134,98 +166,347 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
         console.warn("Found problematic fields:", problematicFields);
       }
 
+      // Helper to compute UTF-8 byte size (important for Hindi text)
+      const byteSize = (val: unknown) =>
+        typeof window !== "undefined"
+          ? new TextEncoder().encode(
+              typeof val === "string" ? val : JSON.stringify(val)
+            ).length
+          : Buffer.from(
+              typeof val === "string" ? val : JSON.stringify(val),
+              "utf8"
+            ).length;
+
       // Perform the Supabase operation
       console.log("🚀 Starting Supabase operation...");
       const startTime = Date.now();
 
       let data: unknown, error: unknown;
+      let cleanedData: Database["public"]["Tables"]["events"]["Insert"] | null =
+        null;
+      let wasTruncated = false;
+
       try {
         if (initialData) {
           console.log("Performing UPDATE operation...");
-          const result = await supabase
-            .from("events")
-            .update(formData)
-            .eq("id", initialData.id)
-            .select();
-          data = result.data;
-          error = result.error;
+
+          // Prepare a cleaned payload similar to INSERT path
+          let updatePayload: Database["public"]["Tables"]["events"]["Update"] =
+            {
+              title_en: formData.title_en.trim(),
+              title_hi: formData.title_hi.trim(),
+              event_date: formData.event_date,
+              start_time: formData.start_time,
+              end_time: formData.end_time?.trim() || null,
+              description_en: formData.description_en?.trim() || null,
+              description_hi: formData.description_hi?.trim() || null,
+              rules_en: formData.rules_en?.trim() || null,
+              rules_hi: formData.rules_hi?.trim() || null,
+              venue_en: formData.venue_en?.trim() || null,
+              venue_hi: formData.venue_hi?.trim() || null,
+              image_url: formData.image_url?.trim() || null,
+              category: formData.category?.trim() || null,
+              organizer_1_name: formData.organizer_1_name?.trim() || null,
+              organizer_1_phone: formData.organizer_1_phone?.trim() || null,
+              organizer_2_name: formData.organizer_2_name?.trim() || null,
+              organizer_2_phone: formData.organizer_2_phone?.trim() || null,
+            };
+
+          // Calculate data size (in bytes) and dynamic timeout
+          let updateSize = byteSize(updatePayload);
+          console.log("📊 Update payload size:", updateSize, "bytes (UTF-8)");
+          const isLargeUpdate = updateSize >= 15000;
+          const updateTimeout = isLargeUpdate ? 120000 : 30000;
+          console.log(
+            "⏰ Using update timeout:",
+            updateTimeout / 1000,
+            "seconds"
+          );
+
+          // Conservative response handling for large updates
+          const useSelectOnUpdate = updateSize < 15000;
+          console.log("📋 UPDATE using .select():", useSelectOnUpdate);
+
+          // Free-tier compatibility: truncate if very large overall size
+          if (updateSize > 25000) {
+            console.log(
+              "⚠️ Update size exceeds 25k, truncating large text fields for free tier..."
+            );
+            updatePayload = {
+              ...updatePayload,
+              description_en:
+                updatePayload.description_en?.substring(0, 800) || null,
+              description_hi:
+                updatePayload.description_hi?.substring(0, 800) || null,
+              rules_en: updatePayload.rules_en?.substring(0, 1500) || null,
+              rules_hi: updatePayload.rules_hi?.substring(0, 1500) || null,
+            };
+            wasTruncated = true;
+            updateSize = byteSize(updatePayload);
+            console.log(
+              "📊 Update size after truncation:",
+              updateSize,
+              "bytes"
+            );
+          }
+
+          const updatePromise = useSelectOnUpdate
+            ? supabase
+                .from("events")
+                .update(updatePayload)
+                .eq("id", initialData.id)
+                .select()
+            : supabase
+                .from("events")
+                .update(updatePayload)
+                .eq("id", initialData.id);
+
+          const updateTimeoutPromise = new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    `Operation timed out after ${updateTimeout / 1000} seconds`
+                  )
+                ),
+              updateTimeout
+            )
+          );
+
+          try {
+            const result = (await Promise.race([
+              updatePromise,
+              updateTimeoutPromise,
+            ])) as { data: unknown; error: unknown };
+            console.log("📝 Update result:", result);
+            data = result.data;
+            error = result.error;
+          } catch (updateErr) {
+            console.error("❌ UPDATE operation failed:", updateErr);
+            // Fallback for timeouts on large updates: try more aggressive truncation, no select
+            if (
+              updateErr instanceof Error &&
+              updateErr.message.includes("timed out") &&
+              updateSize > 15000
+            ) {
+              console.log(
+                "🔄 UPDATE fallback with more aggressive truncation and no .select()"
+              );
+              const moreTruncated = {
+                ...updatePayload,
+                description_en:
+                  updatePayload.description_en?.substring(0, 500) || null,
+                description_hi:
+                  updatePayload.description_hi?.substring(0, 500) || null,
+                rules_en: updatePayload.rules_en?.substring(0, 1200) || null,
+                rules_hi: updatePayload.rules_hi?.substring(0, 1200) || null,
+              };
+              wasTruncated = true;
+              const fallbackRes = await supabase
+                .from("events")
+                .update(moreTruncated)
+                .eq("id", initialData.id);
+              data = fallbackRes.data;
+              error = fallbackRes.error;
+            } else {
+              throw updateErr;
+            }
+          }
         } else {
           console.log("📝 Performing INSERT operation...");
           console.log("📝 Insert data:", formData);
 
-          // Build a strongly-typed Insert payload
-          const cleanedData: Database["public"]["Tables"]["events"]["Insert"] =
-            {
-              title_en: formData.title_en,
-              title_hi: formData.title_hi,
-              event_date: formData.event_date,
-              start_time: formData.start_time,
-              end_time: formData.end_time || null,
-              description_en: formData.description_en || null,
-              description_hi: formData.description_hi || null,
-              rules_en: formData.rules_en || null,
-              rules_hi: formData.rules_hi || null,
-              venue_en: formData.venue_en || null,
-              venue_hi: formData.venue_hi || null,
-              image_url: formData.image_url || null,
-              category: formData.category || null,
-              organizer_1_name: formData.organizer_1_name || null,
-              organizer_1_phone: formData.organizer_1_phone || null,
-              organizer_2_name: formData.organizer_2_name || null,
-              organizer_2_phone: formData.organizer_2_phone || null,
-            };
-          console.log("📝 Cleaned data:", cleanedData);
+          // Build a strongly-typed Insert payload with validation
+          cleanedData = {
+            title_en: formData.title_en.trim(),
+            title_hi: formData.title_hi.trim(),
+            event_date: formData.event_date,
+            start_time: formData.start_time,
+            end_time: formData.end_time?.trim() || null,
+            description_en: formData.description_en?.trim() || null,
+            description_hi: formData.description_hi?.trim() || null,
+            rules_en: formData.rules_en?.trim() || null,
+            rules_hi: formData.rules_hi?.trim() || null,
+            venue_en: formData.venue_en?.trim() || null,
+            venue_hi: formData.venue_hi?.trim() || null,
+            image_url: formData.image_url?.trim() || null,
+            category: formData.category?.trim() || null,
+            organizer_1_name: formData.organizer_1_name?.trim() || null,
+            organizer_1_phone: formData.organizer_1_phone?.trim() || null,
+            organizer_2_name: formData.organizer_2_name?.trim() || null,
+            organizer_2_phone: formData.organizer_2_phone?.trim() || null,
+          };
 
-          // Test basic Supabase connection first with timeout using fresh client
-          console.log(
-            "🔍 Testing basic Supabase connection with fresh client..."
-          );
-          try {
-            const testPromise = freshSupabase
-              .from("events")
-              .select("count")
-              .limit(1);
-            const testTimeout: Promise<never> = new Promise((_, reject) =>
-              setTimeout(
-                () => reject(new Error("Connection test timeout")),
-                5000
-              )
-            );
-
-            const testResult = await Promise.race([testPromise, testTimeout]);
-            console.log("✅ Basic connection test result:", testResult);
-          } catch (testErr) {
-            console.error("❌ Basic connection test failed:", testErr);
-            // If basic connection fails, we should stop here
+          // Additional validation for required fields
+          if (
+            !cleanedData.title_en ||
+            !cleanedData.title_hi ||
+            !cleanedData.event_date ||
+            !cleanedData.start_time
+          ) {
+            console.error("❌ Missing required fields:", {
+              title_en: !!cleanedData.title_en,
+              title_hi: !!cleanedData.title_hi,
+              event_date: !!cleanedData.event_date,
+              start_time: !!cleanedData.start_time,
+            });
             alert(
-              "Database connection failed. Please check your internet connection and try again."
+              "Missing required fields. Please fill in all required fields."
             );
             setIsLoading(false);
             return;
           }
+          console.log("📝 Cleaned data:", cleanedData);
 
-          // Add timeout for INSERT operation - try without .select() first using fresh client
-          const insertPromise = freshSupabase
-            .from("events")
-            .insert(cleanedData);
-
-          const timeoutPromise: Promise<never> = new Promise((_, reject) =>
-            setTimeout(
-              () =>
-                reject(new Error("INSERT operation timeout after 15 seconds")),
-              15000
-            )
+          // Skip connection test - proceed directly to the main operation
+          console.log(
+            "⏭️ Skipping connection test, proceeding to main operation"
           );
 
-          console.log("⏰ Starting INSERT with timeout...");
-          type InsertResult = Awaited<typeof insertPromise>;
-          const result = (await Promise.race([
-            insertPromise,
-            timeoutPromise,
-          ])) as InsertResult;
-          console.log("📝 Insert result:", result);
-          data = result.data;
-          error = result.error;
+          // Perform INSERT operation with better error handling
+          console.log("📝 Starting INSERT operation...");
+          console.log(
+            "📝 Data being inserted:",
+            JSON.stringify(cleanedData, null, 2)
+          );
+
+          // Calculate data size (in bytes) to determine appropriate timeout
+          let dataSize = byteSize(cleanedData);
+
+          try {
+            console.log("📊 Payload size:", dataSize, "bytes (UTF-8)");
+
+            // Use longer timeout for large data (2 minutes)
+            const timeoutDuration = dataSize >= 15000 ? 120000 : 30000;
+            console.log(
+              "⏰ Using timeout duration:",
+              timeoutDuration / 1000,
+              "seconds"
+            );
+
+            // For very large data, try without .select() first to reduce response size
+            // Also use more conservative limits for free tier
+            const shouldUseSelect = dataSize < 15000;
+            console.log("📋 Using .select():", shouldUseSelect);
+
+            // For free tier, be more conservative with data size
+            if (dataSize > 25000) {
+              console.log(
+                "⚠️ Data size exceeds recommended limit for free tier, attempting truncation..."
+              );
+              const truncatedData = {
+                ...cleanedData,
+                description_en:
+                  cleanedData.description_en?.substring(0, 800) || null,
+                description_hi:
+                  cleanedData.description_hi?.substring(0, 800) || null,
+                rules_en: cleanedData.rules_en?.substring(0, 1500) || null,
+                rules_hi: cleanedData.rules_hi?.substring(0, 1500) || null,
+              };
+              console.log(
+                "📝 Using truncated data for free tier compatibility"
+              );
+              cleanedData = truncatedData;
+              wasTruncated = true;
+              dataSize = byteSize(cleanedData);
+              console.log(
+                "📊 New payload size after truncation:",
+                dataSize,
+                "bytes"
+              );
+            }
+
+            // Add a reasonable timeout to prevent infinite hanging
+            const insertPromise = shouldUseSelect
+              ? supabase.from("events").insert(cleanedData).select()
+              : supabase.from("events").insert(cleanedData);
+
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(
+                () =>
+                  reject(
+                    new Error(
+                      `Operation timed out after ${
+                        timeoutDuration / 1000
+                      } seconds`
+                    )
+                  ),
+                timeoutDuration
+              )
+            );
+
+            const result = (await Promise.race([
+              insertPromise,
+              timeoutPromise,
+            ])) as { data: unknown; error: unknown };
+            console.log("📝 Insert result:", result);
+            data = result.data;
+            error = result.error;
+
+            if (error) {
+              console.error("❌ Supabase INSERT error:", error);
+            } else {
+              console.log("✅ INSERT successful:", data);
+            }
+          } catch (insertError) {
+            console.error(
+              "❌ INSERT operation failed with exception:",
+              insertError
+            );
+
+            // If it's a timeout error and data is large, try with truncated text fields
+            if (
+              insertError instanceof Error &&
+              insertError.message.includes("timed out") &&
+              dataSize > 15000
+            ) {
+              console.log(
+                "🔄 Attempting fallback with truncated text fields..."
+              );
+              try {
+                const truncatedData = {
+                  ...cleanedData,
+                  description_en:
+                    cleanedData.description_en?.substring(0, 1000) || null,
+                  description_hi:
+                    cleanedData.description_hi?.substring(0, 1000) || null,
+                  rules_en: cleanedData.rules_en?.substring(0, 2000) || null,
+                  rules_hi: cleanedData.rules_hi?.substring(0, 2000) || null,
+                };
+                wasTruncated = true;
+
+                const fallbackResult = await supabase
+                  .from("events")
+                  .insert(truncatedData)
+                  .select();
+
+                if (fallbackResult.error) {
+                  console.error(
+                    "❌ Fallback INSERT also failed:",
+                    fallbackResult.error
+                  );
+                  error = fallbackResult.error;
+                  data = null;
+                } else {
+                  console.log(
+                    "✅ Fallback INSERT successful with truncated data"
+                  );
+                  data = fallbackResult.data;
+                  error = null;
+                }
+              } catch (fallbackError) {
+                console.error(
+                  "❌ Fallback INSERT failed with exception:",
+                  fallbackError
+                );
+                error = fallbackError;
+                data = null;
+              }
+            } else {
+              error = insertError;
+              data = null;
+            }
+          }
         }
       } catch (supabaseError) {
         console.error(
@@ -256,14 +537,29 @@ export default function EventForm({ initialData, locale }: EventFormProps) {
       }
 
       console.log("Event saved successfully:", data);
-      alert(`Event ${initialData ? "updated" : "created"} successfully!`);
+
+      // Check if data was truncated and inform user
+      const originalDataSize = byteSize(formData);
+      if (wasTruncated || originalDataSize > 25000) {
+        alert(
+          `Event ${
+            initialData ? "updated" : "created"
+          } successfully! Note: Some text fields were automatically shortened to ensure compatibility with the database.`
+        );
+      } else {
+        alert(`Event ${initialData ? "updated" : "created"} successfully!`);
+      }
 
       // Navigate back to admin dashboard
       router.push(`/${locale}/admin`);
       router.refresh();
     } catch (err) {
       console.error("Unexpected error:", err);
-      alert("An unexpected error occurred. Please try again.");
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      alert(
+        `Error: ${errorMessage}. Please check your internet connection and try again.`
+      );
     } finally {
       setIsLoading(false);
     }

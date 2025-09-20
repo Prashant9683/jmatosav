@@ -12,13 +12,34 @@ export default function VolunteerForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      setPhoneError(
+        "Phone number must be exactly 10 digits starting with 6, 7, 8, or 9"
+      );
+      return false;
+    }
+    setPhoneError(null);
+    return true;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setMessage(null);
+    setPhoneError(null);
 
     const formData = new FormData(event.currentTarget);
+    const phoneNumber = formData.get("phoneNumber") as string;
+
+    // Validate phone number
+    if (!validatePhone(phoneNumber)) {
+      setIsLoading(false);
+      return;
+    }
 
     // Try API route first (primary method)
     try {
@@ -107,16 +128,36 @@ export default function VolunteerForm() {
 
           <div className="space-y-2">
             <Label htmlFor="phoneNumber" className="text-black font-medium">
-              Phone Number (Optional)
+              Phone Number
             </Label>
             <Input
               type="tel"
               name="phoneNumber"
               id="phoneNumber"
-              className="bg-white border-black/20 text-black placeholder:text-blue-900/50"
-              placeholder="Enter your phone number"
+              className={`bg-white border-black/20 text-black placeholder:text-blue-900/50 ${
+                phoneError ? "border-red-500" : ""
+              }`}
+              placeholder="Enter 10-digit mobile number (e.g., 9876543210)"
+              pattern="[6-9][0-9]{9}"
+              minLength={10}
+              maxLength={10}
+              required
               disabled={isLoading}
+              onChange={(e) => {
+                if (e.target.value.length === 10) {
+                  validatePhone(e.target.value);
+                } else {
+                  setPhoneError(null);
+                }
+              }}
             />
+            {phoneError ? (
+              <p className="text-xs text-red-600">{phoneError}</p>
+            ) : (
+              <p className="text-xs text-blue-900/60">
+                Enter your 10-digit mobile number starting with 6, 7, 8, or 9
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

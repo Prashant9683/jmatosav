@@ -41,14 +41,64 @@ export default function VolunteersPage() {
     }
   };
 
+  const downloadCSV = () => {
+    if (!volunteers || volunteers.length === 0) {
+      alert("No volunteers to download");
+      return;
+    }
+
+    // Create CSV headers
+    const headers = [
+      "ID",
+      "Full Name",
+      "Email",
+      "Phone Number",
+      "Reason for Volunteering",
+      "Status",
+      "Applied Date",
+    ];
+
+    // Create CSV rows
+    const rows = volunteers.map((volunteer) => [
+      volunteer.id,
+      volunteer.full_name,
+      volunteer.email,
+      volunteer.phone_number || "N/A",
+      volunteer.reason_for_volunteering || "N/A",
+      volunteer.status,
+      volunteer.created_at
+        ? new Date(volunteer.created_at).toLocaleDateString()
+        : "N/A",
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row.map((field) => `"${String(field).replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `volunteers_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Calculate stats
   const totalVolunteers = volunteers?.length || 0;
   const approvedVolunteers =
     volunteers?.filter((v) => v.status === "approved").length || 0;
   const pendingVolunteers =
     volunteers?.filter((v) => v.status === "pending").length || 0;
-  const rejectedVolunteers =
-    volunteers?.filter((v) => v.status === "rejected").length || 0;
 
   if (loading) {
     return (
@@ -190,10 +240,33 @@ export default function VolunteersPage() {
         {/* Main Content */}
         <Card className="bg-white border border-black/10 shadow-md">
           <div className="p-6 border-b border-black/10">
-            <h2 className="text-2xl font-semibold text-black flex items-center">
-              <span className="w-2 h-6 bg-blue-600 mr-3 rounded"></span>
-              Volunteer Applications
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-black flex items-center">
+                <span className="w-2 h-6 bg-blue-600 mr-3 rounded"></span>
+                Volunteer Applications
+              </h2>
+              {volunteers && volunteers.length > 0 && (
+                <button
+                  onClick={downloadCSV}
+                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                >
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Download CSV
+                </button>
+              )}
+            </div>
           </div>
 
           {volunteers && volunteers.length > 0 ? (

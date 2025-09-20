@@ -10,6 +10,7 @@ type Profile = {
 
 type RegistrationWithProfile = {
   id: number;
+  checked_in_at: string | null;
   profiles: Profile;
 };
 
@@ -23,13 +24,16 @@ export default function ExportButton({
   eventName,
 }: ExportButtonProps) {
   const handleExport = () => {
-    const headers = "Name,Email\n";
+    const headers = "Name,Email,CheckedInTime\n";
     const rows = registrations
       .map((reg) => {
         // Safely handle potentially null profiles
         const name = `"${reg.profiles?.full_name || "N/A"}"`;
         const email = `"${reg.profiles?.email || "N/A"}"`;
-        return `${name},${email}`;
+        const checkedInTime = reg.checked_in_at
+          ? `"${new Date(reg.checked_in_at).toLocaleString()}"`
+          : '"N/A"';
+        return `${name},${email},${checkedInTime}`;
       })
       .join("\n");
 

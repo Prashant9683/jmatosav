@@ -6,7 +6,11 @@ import ExportButton from "@/components/admin/ExportButton";
 
 // Local type for display/export
 type Profile = { full_name: string | null; email: string | null } | null;
-type RegistrationWithProfile = { id: number; profiles: Profile };
+type RegistrationWithProfile = {
+  id: number;
+  checked_in_at: string | null;
+  profiles: Profile;
+};
 
 // Correctly typed props for a Next.js 15 Server Component with dynamic params
 interface RegistrationsPageProps {
@@ -35,10 +39,10 @@ export default async function RegistrationsPage({
     notFound();
   }
 
-  // Step 1: Fetch registrations with user_id
+  // Step 1: Fetch registrations with user_id and checked_in_at
   const { data: regRows, error } = await supabase
     .from("registrations")
-    .select("id, user_id")
+    .select("id, user_id, checked_in_at")
     .eq("event_id", parseInt(eventId));
 
   if (error) {
@@ -77,6 +81,7 @@ export default async function RegistrationsPage({
   // Map to the shape expected by ExportButton using joined profiles
   const registrations: RegistrationWithProfile[] = (regRows || []).map((r) => ({
     id: r.id,
+    checked_in_at: r.checked_in_at,
     profiles: profilesById.get(r.user_id) ?? null,
   }));
 
@@ -123,7 +128,7 @@ export default async function RegistrationsPage({
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-8">
           <div className="bg-white border border-black/10 rounded-lg p-6 shadow-md">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
@@ -201,6 +206,32 @@ export default async function RegistrationsPage({
               </div>
             </div>
           </div>
+
+          <div className="bg-white border border-black/10 rounded-lg p-6 shadow-md">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                <svg
+                  className="w-6 h-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-black">
+                  {registrations.filter((r) => r.checked_in_at).length}
+                </div>
+                <div className="text-blue-900/70">Attended</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Registrations Table */}
@@ -226,6 +257,9 @@ export default async function RegistrationsPage({
                     Registration Date
                   </th>
                   <th className="p-4 text-left text-sm font-semibold text-black">
+                    Attendance Status
+                  </th>
+                  <th className="p-4 text-left text-sm font-semibold text-black">
                     Status
                   </th>
                 </tr>
@@ -249,6 +283,44 @@ export default async function RegistrationsPage({
                         {new Date().toLocaleDateString()}
                       </td>
                       <td className="p-4">
+                        {reg.checked_in_at ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-900">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            Attended at{" "}
+                            {new Date(reg.checked_in_at).toLocaleTimeString()}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-900">
+                            <svg
+                              className="w-3 h-3 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            Not Checked In
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             reg.profiles?.full_name
@@ -263,7 +335,7 @@ export default async function RegistrationsPage({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="p-12 text-center">
+                    <td colSpan={5} className="p-12 text-center">
                       <div className="flex flex-col items-center">
                         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                           <svg

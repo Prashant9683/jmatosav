@@ -9,7 +9,13 @@ export async function submitVolunteerApplication(formData: FormData) {
     const schema = z.object({
       fullName: z.string().min(3, "Name must be at least 3 characters long."),
       email: z.string().email("Invalid email address."),
-      phoneNumber: z.string().optional(),
+      phoneNumber: z
+        .string()
+        .regex(/^\d{10}$/, "Phone number must be exactly 10 digits.")
+        .refine(
+          (val) => /^[6-9]\d{9}$/.test(val),
+          "Phone number must start with 6, 7, 8, or 9."
+        ),
       reason: z.string().min(10, "Reason must be at least 10 characters long."),
     });
 
